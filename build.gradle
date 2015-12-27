@@ -60,6 +60,8 @@ jmh {
     fork = 1
     warmupIterations = 5
     iterations = 5
+
+    humanOutputFile = null
 }
 
 bootRun {
