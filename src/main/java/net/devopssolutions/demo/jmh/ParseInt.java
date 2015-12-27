@@ -1,7 +1,6 @@
 package net.devopssolutions.demo.jmh;
 
 import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.runner.options.TimeValue;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -9,8 +8,6 @@ import java.nio.charset.StandardCharsets;
 
 public class ParseInt {
 
-    public static final TimeValue TEST_TIME = TimeValue.milliseconds(1000);
-    public static final int MEASUREMENT_ITERATIONS = 5;
     private static final String toParse = "98989";
     private static final char[] toParseChars = toParse.toCharArray();
     private static final byte[] toParseUtf8 = toParse.getBytes(StandardCharsets.UTF_8);
@@ -256,24 +253,4 @@ public class ParseInt {
         }
     }
 
-//    public static void main(String[] args) throws RunnerException {
-////        byte abc = unsafe.getByte("abc", 0L);
-////        System.out.println(abc);
-//
-//        System.out.println("utf8 bytes: " + toParseUtf8.length);
-//        System.out.println("utf16 bytes: " + toParseUtf16.length);
-//
-//        Options opt = new OptionsBuilder()
-//                .include(".*" + ParseInt.class.getSimpleName() + ".*")
-//                .mode(Mode.Throughput)
-//                .warmupTime(TEST_TIME)
-//                .warmupIterations(MEASUREMENT_ITERATIONS)
-//                .measurementIterations(MEASUREMENT_ITERATIONS)
-//                .measurementTime(TEST_TIME)
-//                .threads(1)
-//                .forks(1)
-//                .build();
-//
-//        new Runner(opt).run();
-//    }
 }

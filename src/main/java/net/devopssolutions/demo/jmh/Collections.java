@@ -1,11 +1,6 @@
 package net.devopssolutions.demo.jmh;
 
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -16,8 +11,6 @@ public class Collections {
     public static final int LIST_SIZE = 1_000_000;
     public static final int LIST_SIZE_DIV_2 = LIST_SIZE / 2;
     public static final int NUMBER_OF_ADDITIONS = 100;
-    public static final TimeValue TEST_TIME = TimeValue.milliseconds(1000);
-    public static final int MEASUREMENT_ITERATIONS = 5;
 
     @State(Scope.Benchmark)
     public static class StateArrayList {
@@ -73,19 +66,4 @@ public class Collections {
         }
     }
 
-
-    public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(".*" + Collections.class.getSimpleName() + ".*")
-                .mode(Mode.Throughput)
-                .warmupTime(TEST_TIME)
-                .warmupIterations(MEASUREMENT_ITERATIONS)
-                .measurementIterations(MEASUREMENT_ITERATIONS)
-                .measurementTime(TEST_TIME)
-                .threads(1)
-                .forks(1)
-                .build();
-
-        new Runner(opt).run();
-    }
 }
