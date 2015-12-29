@@ -1,36 +1,18 @@
 package net.devopssolutions.demo.jmh;
 
 import org.openjdk.jmh.annotations.*;
-import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 @Warmup(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 5)
-@Measurement(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 5)
+@Measurement(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 20)
 @Threads(1)
 @Fork(0)
 public class ParseInt {
 
-    private static final String toParse = "98989";
-    private static final char[] toParseChars = toParse.toCharArray();
-    private static final byte[] toParseUtf8 = toParse.getBytes(StandardCharsets.UTF_8);
-    private static final byte[] toParseUtf16 = toParse.getBytes(StandardCharsets.UTF_16);
-    private static final Unsafe unsafe;
     private static final Field STRING_VALUE_FIELD;
-
-    static {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            unsafe = (Unsafe) theUnsafe.get(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
     static {
         try {
             STRING_VALUE_FIELD = String.class.getDeclaredField("value");
@@ -40,69 +22,77 @@ public class ParseInt {
         }
     }
 
-    @Benchmark
-    public int parseStringToIntIntegerParseInt() {
-        return Integer.parseInt(toParse, 10);
+    @State(Scope.Thread)
+    public static class StateStringToParse {
+        String toParse = "98989";
+        char[] toParseChars = toParse.toCharArray();
+        final byte[] toParseUtf8 = toParse.getBytes(StandardCharsets.UTF_8);
+        final byte[] toParseUtf16 = toParse.getBytes(StandardCharsets.UTF_16);
     }
 
     @Benchmark
-    public int parseStringToIntLuxoft() {
-        return convertStringToIntLuxoft(toParse);
+    public int parseStringToIntIntegerParseInt(StateStringToParse state) {
+        return Integer.parseInt(state.toParse, 10);
     }
 
     @Benchmark
-    public int parseStringToIntLuxoftFori() {
-        return convertStringToIntLuxoftFori(toParse);
+    public int parseStringToIntLuxoft(StateStringToParse state) {
+        return convertStringToIntLuxoft(state.toParse);
     }
 
     @Benchmark
-    public int parseStringToIntLuxoftFori2() {
-        return convertStringToIntLuxoftFori2(toParse);
+    public int parseStringToIntLuxoftFori(StateStringToParse state) {
+        return convertStringToIntLuxoftFori(state.toParse);
     }
 
     @Benchmark
-    public int parseStringToIntReflectionGetChars() throws IllegalAccessException {
-        return convertStringToIntReflectionGetChars(toParse);
+    public int parseStringToIntLuxoftFori2(StateStringToParse state) {
+        return convertStringToIntLuxoftFori2(state.toParse);
     }
 
     @Benchmark
-    public int parseStringToIntLuxoftChars() {
-        return convertStringToIntLuxoftChars(toParseChars);
+    public int parseStringToIntReflectionGetChars(StateStringToParse state) throws IllegalAccessException {
+        return convertStringToIntReflectionGetChars(state.toParse);
     }
 
     @Benchmark
-    public int parseStringToIntStackOverflow() {
-        return intValueOfStackOverflow(toParse);
+    public int parseStringToIntLuxoftChars(StateStringToParse state) {
+        return convertStringToIntLuxoftChars(state.toParseChars);
     }
 
     @Benchmark
-    public int parseStringToIntUsingSwitch() {
-        return convertStringToIntUsingSwitch(toParse);
+    public int parseStringToIntStackOverflow(StateStringToParse state) {
+        return intValueOfStackOverflow(state.toParse);
     }
 
     @Benchmark
-    public int parseStringToIntUtf8Bytes() {
-        return convertStringToIntUtf8Bytes(toParseUtf8);
+    public int parseStringToIntUsingSwitch(StateStringToParse state) {
+        return convertStringToIntUsingSwitch(state.toParse);
     }
 
     @Benchmark
-    public int parseStringToIntUtf8Bytes2() {
-        return convertStringToIntUtf8Bytes2(toParseUtf8);
+    public int parseStringToIntUtf8Bytes(StateStringToParse state) {
+        return convertStringToIntUtf8Bytes(state.toParseUtf8);
     }
 
     @Benchmark
-    public int parseStringToIntUtf16Bytes() {
-        return convertStringToIntUtf8Bytes(toParseUtf16);
+    public int parseStringToIntUtf8Bytes2(StateStringToParse state) {
+        return convertStringToIntUtf8Bytes2(state.toParseUtf8);
     }
 
     @Benchmark
-    public int parseStringToIntUtf16Bytes2() {
-        return convertStringToIntUtf8Bytes(toParse.getBytes(StandardCharsets.UTF_16));
+    public int parseStringToIntUtf16Bytes(StateStringToParse state) {
+        return convertStringToIntUtf8Bytes(state.toParseUtf16);
     }
 
     @Benchmark
-    public int parseStringToIntStringToUtf8Bytes() {
-        return convertStringToIntUtf8Bytes(toParse.getBytes(StandardCharsets.UTF_8));
+    public int parseStringToIntUtf16Bytes2(StateStringToParse state) {
+        return convertStringToIntUtf8Bytes(state.toParse.getBytes(StandardCharsets.UTF_16));
+    }
+
+    @Benchmark
+    public int parseStringToIntStringToUtf8Bytes(StateStringToParse state) {
+        return convertStringToIntUtf8Bytes(state.toParse.getBytes(StandardCharsets.UTF_8));
     }
 
     public static int convertStringToIntLuxoft(String num) {
