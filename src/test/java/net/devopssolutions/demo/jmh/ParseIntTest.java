@@ -16,7 +16,7 @@ public class ParseIntTest {
     @Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"0", 0}, {"1", 1}, {"2", 2}, {"3", 3},
+                {"0", 0}, {"1", 1}, {"2", 2}, {"3", 3}, {"989819", 989819}, {"98989", 98989},
         });
     }
 
