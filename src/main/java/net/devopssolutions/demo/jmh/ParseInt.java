@@ -31,6 +31,16 @@ public class ParseInt {
         byte[] toParseUtf8;
         byte[] toParseUtf16;
 
+        public StateStringToParse() {
+        }
+
+        public StateStringToParse(String toParse) {
+            this.toParse = toParse;
+            toParseChars = toParse.toCharArray();
+            toParseUtf8 = toParse.getBytes(StandardCharsets.UTF_8);
+            toParseUtf16 = toParse.getBytes(StandardCharsets.UTF_16);
+        }
+
         @Setup(Level.Iteration)
         public void init() {
             toParseChars = toParse.toCharArray();
@@ -113,22 +123,22 @@ public class ParseInt {
 
     @Benchmark
     public int parseStringToIntUtf16Bytes(StateStringToParse state) {
-        return convertStringToIntFromBytes(state.toParseUtf16);
+        return convertStringToIntFromBytesUtf16(state.toParseUtf16);
     }
 
     @Benchmark
     public int parseStringToIntUtf16Bytes2(StateStringToParse state) {
-        return convertStringToIntFromBytes2(state.toParseUtf16);
+        return convertStringToIntFromBytes2Utf16(state.toParseUtf16);
     }
 
     @Benchmark
     public int parseStringToIntUtf16Bytes3(StateStringToParse state) {
-        return convertStringToIntFromBytes3(state.toParseUtf16);
+        return convertStringToIntFromBytes3Utf16(state.toParseUtf16);
     }
 
     @Benchmark
     public int parseStringToIntStringToUtf16Bytes(StateStringToParse state) {
-        return convertStringToIntFromBytes(state.toParse.getBytes(StandardCharsets.UTF_16));
+        return convertStringToIntFromBytesUtf16(state.toParse.getBytes(StandardCharsets.UTF_16));
     }
 
     @Benchmark
@@ -284,6 +294,55 @@ public class ParseInt {
         return result;
     }
 
+    public static int convertStringToIntFromBytesUtf16(byte[] num) {
+        int result = 0;
+        final int zeroAscii = 48;
+        final int nineAscii = 57;
+        for (byte c : num) {
+            if (c <= 0) {
+                continue;
+            }
+            if (c >= zeroAscii && c <= nineAscii) {
+                result = result * 10 + (c - zeroAscii);
+            } else
+                return -1;
+        }
+        return result;
+    }
+
+    public static int convertStringToIntFromBytes2Utf16(byte[] num) {
+        int result = 0;
+        final int zeroAscii = 48;
+        final int nineAscii = 57;
+        for (int i = 0; i < num.length; i++) {
+            if (num[i] <= 0) {
+                continue;
+            }
+            if (num[i] >= zeroAscii && num[i] <= nineAscii) {
+                result = result * 10 + (num[i] - zeroAscii);
+            } else
+                return -1;
+        }
+        return result;
+    }
+
+    public static int convertStringToIntFromBytes3Utf16(byte[] num) {
+        int result = 0;
+        final int zeroAscii = 48;
+        final int nineAscii = 57;
+        for (int i = 0; i < num.length; i++) {
+            final byte b = num[i];
+            if (b <= 0) {
+                continue;
+            }
+            if (b >= zeroAscii && b <= nineAscii) {
+                result = result * 10 + (b - zeroAscii);
+            } else
+                return -1;
+        }
+        return result;
+    }
+
     public static int convertStringToIntFromBytes2(byte[] num) {
         int result = 0;
         final int zeroAscii = 48;
@@ -302,7 +361,7 @@ public class ParseInt {
         final int zeroAscii = 48;
         final int nineAscii = 57;
         for (int i = 0; i < num.length; i++) {
-            byte b = num[i];
+            final byte b = num[i];
             if (b >= zeroAscii && b <= nineAscii) {
                 result = result * 10 + (b - zeroAscii);
             } else
