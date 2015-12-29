@@ -7,12 +7,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 @Warmup(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 5)
-@Measurement(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 20)
+@Measurement(timeUnit = TimeUnit.MILLISECONDS, time = 200, iterations = 5)
 @Threads(1)
 @Fork(0)
 public class ParseInt {
 
     private static final Field STRING_VALUE_FIELD;
+
     static {
         try {
             STRING_VALUE_FIELD = String.class.getDeclaredField("value");
@@ -24,10 +25,25 @@ public class ParseInt {
 
     @State(Scope.Thread)
     public static class StateStringToParse {
-        String toParse = "98989";
-        char[] toParseChars = toParse.toCharArray();
-        final byte[] toParseUtf8 = toParse.getBytes(StandardCharsets.UTF_8);
-        final byte[] toParseUtf16 = toParse.getBytes(StandardCharsets.UTF_16);
+        @Param({"989819", "98989", "1", "2", "3257"})
+        public String toParse;
+        char[] toParseChars;
+        byte[] toParseUtf8;
+        byte[] toParseUtf16;
+
+        @Setup(Level.Iteration)
+        public void init() {
+            toParseChars = toParse.toCharArray();
+            toParseUtf8 = toParse.getBytes(StandardCharsets.UTF_8);
+            toParseUtf16 = toParse.getBytes(StandardCharsets.UTF_16);
+        }
+
+        @TearDown(Level.Iteration)
+        public void end() {
+            toParseChars = null;
+            toParseUtf8 = null;
+            toParseUtf16 = null;
+        }
     }
 
     @Benchmark
@@ -61,6 +77,16 @@ public class ParseInt {
     }
 
     @Benchmark
+    public int parseStringToIntLuxoftChars2(StateStringToParse state) {
+        return convertStringToIntLuxoftChars2(state.toParseChars);
+    }
+
+    @Benchmark
+    public int parseStringToIntLuxoftChars3(StateStringToParse state) {
+        return convertStringToIntLuxoftChars3(state.toParseChars);
+    }
+
+    @Benchmark
     public int parseStringToIntStackOverflow(StateStringToParse state) {
         return intValueOfStackOverflow(state.toParse);
     }
@@ -72,34 +98,49 @@ public class ParseInt {
 
     @Benchmark
     public int parseStringToIntUtf8Bytes(StateStringToParse state) {
-        return convertStringToIntUtf8Bytes(state.toParseUtf8);
+        return convertStringToIntFromBytes(state.toParseUtf8);
     }
 
     @Benchmark
     public int parseStringToIntUtf8Bytes2(StateStringToParse state) {
-        return convertStringToIntUtf8Bytes2(state.toParseUtf8);
+        return convertStringToIntFromBytes2(state.toParseUtf8);
+    }
+
+    @Benchmark
+    public int parseStringToIntUtf8Bytes3(StateStringToParse state) {
+        return convertStringToIntFromBytes3(state.toParseUtf8);
     }
 
     @Benchmark
     public int parseStringToIntUtf16Bytes(StateStringToParse state) {
-        return convertStringToIntUtf8Bytes(state.toParseUtf16);
+        return convertStringToIntFromBytes(state.toParseUtf16);
     }
 
     @Benchmark
     public int parseStringToIntUtf16Bytes2(StateStringToParse state) {
-        return convertStringToIntUtf8Bytes(state.toParse.getBytes(StandardCharsets.UTF_16));
+        return convertStringToIntFromBytes2(state.toParseUtf16);
+    }
+
+    @Benchmark
+    public int parseStringToIntUtf16Bytes3(StateStringToParse state) {
+        return convertStringToIntFromBytes3(state.toParseUtf16);
+    }
+
+    @Benchmark
+    public int parseStringToIntStringToUtf16Bytes(StateStringToParse state) {
+        return convertStringToIntFromBytes(state.toParse.getBytes(StandardCharsets.UTF_16));
     }
 
     @Benchmark
     public int parseStringToIntStringToUtf8Bytes(StateStringToParse state) {
-        return convertStringToIntUtf8Bytes(state.toParse.getBytes(StandardCharsets.UTF_8));
+        return convertStringToIntFromBytes(state.toParse.getBytes(StandardCharsets.UTF_8));
     }
 
     public static int convertStringToIntLuxoft(String num) {
         int result = 0;
         final int zeroAscii = 48;
         final int nineAscii = 57;
-        for (char c : num.toCharArray()) {
+        for (final char c : num.toCharArray()) {
             if (c >= zeroAscii && c <= nineAscii) {
                 result = result * 10 + (c - zeroAscii);
             } else
@@ -127,7 +168,7 @@ public class ParseInt {
         final int nineAscii = 57;
         final int length = num.length();
         for (int i = 0; i < length; i++) {
-            char c = num.charAt(i);
+            final char c = num.charAt(i);
             if (c >= zeroAscii && c <= nineAscii) {
                 result = result * 10 + (c - zeroAscii);
             } else
@@ -140,7 +181,7 @@ public class ParseInt {
         int result = 0;
         final int zeroAscii = 48;
         final int nineAscii = 57;
-        for (char c : (char[]) STRING_VALUE_FIELD.get(num)) {
+        for (final char c : (char[]) STRING_VALUE_FIELD.get(num)) {
             if (c >= zeroAscii && c <= nineAscii) {
                 result = result * 10 + (c - zeroAscii);
             } else
@@ -153,7 +194,34 @@ public class ParseInt {
         int result = 0;
         final int zeroAscii = 48;
         final int nineAscii = 57;
-        for (char c : num) {
+        for (final char c : num) {
+            if (c >= zeroAscii && c <= nineAscii) {
+                result = result * 10 + (c - zeroAscii);
+            } else
+                return -1;
+        }
+        return result;
+    }
+
+    public static int convertStringToIntLuxoftChars2(char[] num) {
+        int result = 0;
+        final int zeroAscii = 48;
+        final int nineAscii = 57;
+        for (int i = 0; i < num.length; i++) {
+            if (num[i] >= zeroAscii && num[i] <= nineAscii) {
+                result = result * 10 + (num[i] - zeroAscii);
+            } else
+                return -1;
+        }
+        return result;
+    }
+
+    public static int convertStringToIntLuxoftChars3(char[] num) {
+        int result = 0;
+        final int zeroAscii = 48;
+        final int nineAscii = 57;
+        for (int i = 0; i < num.length; i++) {
+            final char c = num[i];
             if (c >= zeroAscii && c <= nineAscii) {
                 result = result * 10 + (c - zeroAscii);
             } else
@@ -164,7 +232,7 @@ public class ParseInt {
 
     public static int convertStringToIntUsingSwitch(String num) {
         int result = 0;
-        for (char c : num.toCharArray()) {
+        for (final char c : num.toCharArray()) {
             switch (c) {
                 case '0':
                     result = result * 10 + (0);
@@ -203,7 +271,7 @@ public class ParseInt {
         return result;
     }
 
-    public static int convertStringToIntUtf8Bytes(byte[] num) {
+    public static int convertStringToIntFromBytes(byte[] num) {
         int result = 0;
         final int zeroAscii = 48;
         final int nineAscii = 57;
@@ -216,13 +284,27 @@ public class ParseInt {
         return result;
     }
 
-    public static int convertStringToIntUtf8Bytes2(byte[] num) {
+    public static int convertStringToIntFromBytes2(byte[] num) {
         int result = 0;
         final int zeroAscii = 48;
         final int nineAscii = 57;
         for (int i = 0; i < num.length; i++) {
             if (num[i] >= zeroAscii && num[i] <= nineAscii) {
                 result = result * 10 + (num[i] - zeroAscii);
+            } else
+                return -1;
+        }
+        return result;
+    }
+
+    public static int convertStringToIntFromBytes3(byte[] num) {
+        int result = 0;
+        final int zeroAscii = 48;
+        final int nineAscii = 57;
+        for (int i = 0; i < num.length; i++) {
+            byte b = num[i];
+            if (b >= zeroAscii && b <= nineAscii) {
+                result = result * 10 + (b - zeroAscii);
             } else
                 return -1;
         }
