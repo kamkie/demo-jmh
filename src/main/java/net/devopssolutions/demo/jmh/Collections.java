@@ -5,12 +5,16 @@ import org.openjdk.jmh.annotations.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Warmup(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 5)
+@Measurement(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 5)
+@Threads(1)
+@Fork(0)
 public class Collections {
 
     public static final int LIST_SIZE = 1_000_000;
     public static final int LIST_SIZE_DIV_2 = LIST_SIZE / 2;
-    public static final int NUMBER_OF_ADDITIONS = 100;
 
     @State(Scope.Benchmark)
     public static class StateArrayList {
@@ -54,16 +58,12 @@ public class Collections {
 
     @Benchmark
     public void addLinkedList(StateLinkedList state) {
-        for (int i = 0; i < NUMBER_OF_ADDITIONS; i++) {
-            state.list.add(LIST_SIZE_DIV_2, -999);
-        }
+        state.list.add(LIST_SIZE_DIV_2, -999);
     }
 
     @Benchmark
     public void addArrayList(StateArrayList state) {
-        for (int i = 0; i < NUMBER_OF_ADDITIONS; i++) {
-            state.list.add(LIST_SIZE_DIV_2, -999);
-        }
+        state.list.add(LIST_SIZE_DIV_2, -999);
     }
 
 }

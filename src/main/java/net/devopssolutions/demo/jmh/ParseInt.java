@@ -1,11 +1,16 @@
 package net.devopssolutions.demo.jmh;
 
-import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.*;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
+@Warmup(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 5)
+@Measurement(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 5)
+@Threads(1)
+@Fork(0)
 public class ParseInt {
 
     private static final String toParse = "98989";

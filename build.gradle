@@ -39,17 +39,7 @@ dependencies {
 
 jmh {
     include 'net\\.devopssolutions\\.demo\\.jmh\\..*'
-
     verbosity = 'EXTRA'
     jmhVersion = extJmhVersion
-
-    timeOnIteration = '100ms'
-    threads = 1
-
-    warmupForks = 1
-    fork = 1
-    warmupIterations = 5
-    iterations = 5
-
     humanOutputFile = null
 }
