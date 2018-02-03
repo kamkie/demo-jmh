@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(timeUnit = TimeUnit.MILLISECONDS, time = 100, iterations = 5)
 @Measurement(timeUnit = TimeUnit.MILLISECONDS, time = 200, iterations = 5)
 @Threads(1)
-@Fork(0)
+@Fork(1)
 public class ParseInt {
 
     private static final Field STRING_VALUE_FIELD;
