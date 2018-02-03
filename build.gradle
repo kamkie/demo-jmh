@@ -4,27 +4,25 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "me.champeau.gradle:jmh-gradle-plugin:0.2.0"
+        classpath('com.toomuchcoding:uptodate-gradle-plugin:1.0.1')
     }
-}
-ext {
-    extJmhVersion = '1.11.2'
 }
 
-def getVersionName = { ->
-    def stdout = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'describe', '--tags'
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
+plugins {
+    id 'com.palantir.git-version' version '0.10.1'
+    id 'com.github.ben-manes.versions' version '0.17.0'
+    id "me.champeau.gradle.jmh" version "0.4.5"
 }
 
 apply plugin: 'java'
-apply plugin: 'me.champeau.gradle.jmh'
+apply plugin: 'com.toomuchcoding.uptodate'
+
+ext {
+    extJmhVersion = '1.20'
+}
 
 group 'net.devopssolutions'
-version = getVersionName()
+version = gitVersion()
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -32,16 +30,27 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    compile "org.openjdk.jmh:jmh-core:$extJmhVersion"
-    compile "org.openjdk.jmh:jmh-generator-annprocess:$extJmhVersion"
+sourceSets {
+    test {
+        java {
+            srcDirs = ["src/test/java", "src/jmh/java"]
+        }
+    }
+}
 
-    testCompile group: 'junit', name: 'junit', version: '4.+'
+dependencies {
+    testCompile "org.openjdk.jmh:jmh-core:$extJmhVersion"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 jmh {
-    include 'net\\.devopssolutions\\.demo\\.jmh\\..*'
+//    include = ['net\\.devopssolutions\\.demo\\.jmh\\..*\\.class']
     verbosity = 'EXTRA'
-    jmhVersion = extJmhVersion
-    humanOutputFile = null
+    jmhVersion extJmhVersion
+    includeTests = false
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.5'
+    distributionType = org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 }
