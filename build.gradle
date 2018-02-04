@@ -23,24 +23,16 @@ ext {
 
 group 'net.devopssolutions'
 version = gitVersion()
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_1_9
+targetCompatibility = JavaVersion.VERSION_1_9
 
 repositories {
     mavenCentral()
 }
 
-sourceSets {
-    test {
-        java {
-            srcDirs = ["src/test/java", "src/jmh/java"]
-        }
-    }
-}
-
 dependencies {
-    testCompile "org.openjdk.jmh:jmh-core:$extJmhVersion"
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'org.assertj:assertj-core:3.9.0'
 }
 
 jmh {
